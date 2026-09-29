@@ -76,10 +76,15 @@ public class MapContainHandler implements ContainHandler {
 
             containAnalyzer.registerConvertedActualByPath(comparator.getConvertedActualByPath());
             if (!actualValueEqual) {
-                comparator.getMissingMessages().forEach(m -> containAnalyzer.reportMissing(this, m));
-                comparator.getNotEqualMessages().forEach(m -> containAnalyzer.reportMismatch(this, m));
+                if (comparator.getMissingMessages() != null) {
+                    comparator.getMissingMessages().forEach(m -> containAnalyzer.reportMissing(this, m));
+                }
+
+                if (comparator.getNotEqualMessages() != null) {
+                    comparator.getNotEqualMessages().forEach(m -> containAnalyzer.reportMismatch(this, m));
+                }
             } else {
-                containAnalyzer.reportMatch(this, propertyPath, comparator.generateEqualMatchReport());
+                containAnalyzer.reportMatch(this, propertyPath, comparator::generateEqualMatchReport);
             }
         }
     }

@@ -22,10 +22,11 @@
     <parent>
         <groupId>org.testingisdocumenting.webtau</groupId>
         <artifactId>webtau-parent</artifactId>
-        <version>2.2-SNAPSHOT</version>
+        <version>2.6.4-SNAPSHOT</version>
     </parent>
 
     <artifactId>webtau-shaded</artifactId>
+    <name>WebTau Shaded</name>
 
     <dependencies>
         <dependency>
@@ -117,6 +118,40 @@
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.GroovyResourceTransformer" />
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
                             </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>empty-sources-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>sources</classifier>
+                            <classesDirectory>${project.basedir}/src</classesDirectory>
+                            <includes>
+                                <include>**/*.java</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>empty-javadoc-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>javadoc</classifier>
+                            <classesDirectory>${project.basedir}/src</classesDirectory>
+                            <includes>
+                                <include>**/*.java</include>
+                            </includes>
                         </configuration>
                     </execution>
                 </executions>

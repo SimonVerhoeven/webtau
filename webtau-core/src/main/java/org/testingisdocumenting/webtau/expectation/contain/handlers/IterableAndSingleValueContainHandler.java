@@ -53,7 +53,7 @@ public class IterableAndSingleValueContainHandler implements ContainHandler {
             suspects.forEach(list -> containAnalyzer.registerExtraMismatchPaths(list.extractPaths()));
             suspects.forEach(list -> {
                 containAnalyzer.reportMismatches(this, list.mismatchMessages());
-                containAnalyzer.reportMissing(this, list.missingMessage());
+                containAnalyzer.reportMissing(this, list.missingMessages());
             });
         }
 
@@ -66,7 +66,8 @@ public class IterableAndSingleValueContainHandler implements ContainHandler {
         List<IndexedValue> indexedValues = analyzer.findContainingIndexedValues();
 
         if (!indexedValues.isEmpty()) {
-            analyzer.getComparator().getEqualMessages().forEach(message -> containAnalyzer.reportMatch(this, message.getActualPath(), message.getMessage()));
+            analyzer.getComparator().getEqualMessages().forEach(message ->
+                    containAnalyzer.reportMatch(this, message.actualPath(), message.messageFunc()));
         }
 
         containAnalyzer.registerConvertedActualByPath(analyzer.getComparator().getConvertedActualByPath());

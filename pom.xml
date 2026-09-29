@@ -21,7 +21,7 @@
 
     <groupId>org.testingisdocumenting.webtau</groupId>
     <artifactId>webtau-parent</artifactId>
-    <version>2.2-SNAPSHOT</version>
+    <version>2.6.4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>WebTau</name>
@@ -82,12 +82,12 @@
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
 
         <repository>
             <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
 
@@ -147,18 +147,17 @@
         <maven.compiler.release>17</maven.compiler.release>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-        <groovy.version>3.0.15</groovy.version>
+        <groovy.version>3.0.25</groovy.version>
         <jackson.version>2.18.6</jackson.version>
         <slf4j.version>1.7.30</slf4j.version>
-        <spring.version>5.3.14</spring.version>
+        <spring.version>5.3.19</spring.version>
         <maven.api.version>3.8.1</maven.api.version>
-        <tomcat.version>9.0.45</tomcat.version>
+        <tomcat.version>9.0.90</tomcat.version>
         <junit5.version>5.9.3</junit5.version>
         <graphql.version>16.2</graphql.version>
         <jacoco.version>0.8.10</jacoco.version>
         <swagger.version>1.6.1</swagger.version>
-        <jetty.version>9.4.51.v20230217</jetty.version>
+        <jetty.version>9.4.56.v20240826</jetty.version>
         <testcontainers.version>1.17.6</testcontainers.version>
     </properties>
 
@@ -221,7 +220,7 @@
             <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
-                <version>2.7</version>
+                <version>2.15.1</version>
             </dependency>
 
             <dependency>
@@ -233,7 +232,7 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
-                <version>1.21</version>
+                <version>1.26.0</version>
             </dependency>
 
             <dependency>
@@ -275,7 +274,7 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.10</version>
+                <version>3.18.0</version>
             </dependency>
 
             <dependency>
@@ -293,7 +292,7 @@
             <dependency>
                 <groupId>io.github.bonigarcia</groupId>
                 <artifactId>webdrivermanager</artifactId>
-                <version>5.4.1</version>
+                <version>6.3.1</version>
             </dependency>
 
             <dependency>
@@ -395,7 +394,7 @@
             <dependency>
                 <groupId>net.bytebuddy</groupId>
                 <artifactId>byte-buddy</artifactId>
-                <version>1.10.13</version>
+                <version>1.14.12</version>
             </dependency>
 
             <dependency>
@@ -681,7 +680,7 @@
                 <plugin>
                     <groupId>org.codehaus.gmavenplus</groupId>
                     <artifactId>gmavenplus-plugin</artifactId>
-                    <version>1.10.1</version>
+                    <version>3.0.2</version>
                     <dependencies>
                         <dependency>
                             <groupId>org.codehaus.groovy</groupId>
@@ -749,7 +748,7 @@
                         </execution>
                     </executions>
                     <configuration>
-                        <nodeVersion>v12.16.3</nodeVersion>
+                        <nodeVersion>v22.21.1</nodeVersion>
                         <installDirectory>.mvn</installDirectory>
                         <workingDirectory>src</workingDirectory>
                     </configuration>
@@ -811,11 +810,10 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.1.1</version>
+                    <version>3.6.3</version>
                     <configuration>
                         <detectOfflineLinks>false</detectOfflineLinks>
-                        <source>8</source>
-                        <javadocVersion>8</javadocVersion>
+                        <source>17</source>
                     </configuration>
                 </plugin>
             </plugins>
@@ -837,15 +835,13 @@
             </plugin>
 
             <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.8</version>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.8.0</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                    <keepStagingRepositoryOnCloseRuleFailure>true</keepStagingRepositoryOnCloseRuleFailure>
+                    <publishingServerId>central</publishingServerId>
+                    <autoPublish>true</autoPublish>
                 </configuration>
             </plugin>
 

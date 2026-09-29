@@ -23,12 +23,14 @@ import org.testingisdocumenting.webtau.data.render.PrettyPrinter;
 import org.testingisdocumenting.webtau.expectation.contain.handlers.IterableAndTableContainHandler;
 import org.testingisdocumenting.webtau.expectation.contain.handlers.IterableAndSingleValueContainHandler;
 import org.testingisdocumenting.webtau.expectation.contain.handlers.NullContainHandler;
+import org.testingisdocumenting.webtau.expectation.equality.ValuePathLazyMessageList;
 import org.testingisdocumenting.webtau.expectation.equality.ValuePathMessage;
 import org.testingisdocumenting.webtau.reporter.TokenizedMessage;
 import org.testingisdocumenting.webtau.utils.ServiceLoaderUtils;
 import org.testingisdocumenting.webtau.utils.TraceUtils;
 
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -38,9 +40,9 @@ import static org.testingisdocumenting.webtau.expectation.TokenizedReportUtils.*
 public class ContainAnalyzer {
     private static final List<ContainHandler> handlers = discoverHandlers();
 
-    private final List<ValuePathMessage> matchMessages;
-    private final List<ValuePathMessage> mismatchMessages;
-    private final List<ValuePathMessage> missingMessages;
+    private final ValuePathLazyMessageList matchMessages;
+    private final ValuePathLazyMessageList mismatchMessages;
+    private final ValuePathLazyMessageList missingMessages;
 
     private final Set<ValuePath> extraMismatchPaths;
 
@@ -81,23 +83,23 @@ public class ContainAnalyzer {
         mismatchMessages.add(valuePathMessage);
     }
 
-    public void reportMismatches(ContainHandler reporter, List<ValuePathMessage> valuePathMessages) {
+    public void reportMismatches(ContainHandler reporter, ValuePathLazyMessageList valuePathMessages) {
         mismatchMessages.addAll(valuePathMessages);
     }
 
-    public void reportMismatch(ContainHandler reporter, ValuePath actualPath, TokenizedMessage mismatch) {
+    public void reportMismatch(ContainHandler reporter, ValuePath actualPath, Supplier<TokenizedMessage> mismatch) {
         reportMismatch(reporter, new ValuePathMessage(actualPath, mismatch));
     }
 
     public void reportMissing(ContainHandler reporter, ValuePath actualPath, Object value) {
-        missingMessages.add(new ValuePathMessage(actualPath, tokenizedMessage().value(value)));
+        missingMessages.add(new ValuePathMessage(actualPath, () -> tokenizedMessage().value(value)));
     }
 
     public void reportMissing(ContainHandler reporter, ValuePathMessage valuePathMessage) {
         missingMessages.add(valuePathMessage);
     }
 
-    public void reportMissing(ContainHandler reporter, List<ValuePathMessage> valuePathMessages) {
+    public void reportMissing(ContainHandler reporter, ValuePathLazyMessageList valuePathMessages) {
         missingMessages.addAll(valuePathMessages);
     }
 
@@ -105,27 +107,27 @@ public class ContainAnalyzer {
         mismatchedExpectedValues.add(oneOfExpectedValues);
     }
 
-    public void reportMatch(ContainHandler reporter, ValuePath actualPath, TokenizedMessage mismatch) {
+    public void reportMatch(ContainHandler reporter, ValuePath actualPath, Supplier<TokenizedMessage> mismatch) {
         matchMessages.add(new ValuePathMessage(actualPath, mismatch));
     }
 
     public Set<ValuePath> generateMatchPaths() {
-        return extractActualPaths(matchMessages);
+        return matchMessages.extractPaths();
     }
 
     public Set<ValuePath> generateMismatchPaths() {
         HashSet<ValuePath> result = new HashSet<>(extraMismatchPaths);
-        result.addAll(extractActualPaths(mismatchMessages));
-        result.addAll(extractActualPaths(missingMessages));
+        result.addAll(mismatchMessages.extractPaths());
+        result.addAll(missingMessages.extractPaths());
 
         return result;
     }
 
     public TokenizedMessage generateMatchReport() {
         return TokenizedMessage.join("\n", matchMessages.stream().map(message ->
-                message.getActualPath().equals(topLevelActualPath) ?
-                        message.getMessage() :
-                        message.getFullMessage()).collect(Collectors.toList()));
+                message.actualPath().equals(topLevelActualPath) ?
+                        message.buildMessage() :
+                        message.buildFullMessage()).collect(Collectors.toList()));
     }
 
     public TokenizedMessage generateMismatchReport() {
@@ -158,6 +160,14 @@ public class ContainAnalyzer {
         return matchMessages.isEmpty();
     }
 
+    public int numberMatchMessages() {
+        return matchMessages.size();
+    }
+
+    public int numberOfMismatchMessages() {
+        return mismatchMessages.size() + missingMessages.size() + mismatchedExpectedValues.size();
+    }
+
     public void registerConvertedActualByPath(Map<ValuePath, Object> convertedActualByPath) {
         this.convertedActualByPath.putAll(convertedActualByPath);
     }
@@ -175,9 +185,9 @@ public class ContainAnalyzer {
     }
 
     private ContainAnalyzer() {
-        this.matchMessages = new ArrayList<>();
-        this.mismatchMessages = new ArrayList<>();
-        this.missingMessages = new ArrayList<>();
+        this.matchMessages = new ValuePathLazyMessageList();
+        this.mismatchMessages = new ValuePathLazyMessageList();
+        this.missingMessages = new ValuePathLazyMessageList();
         this.mismatchedExpectedValues = new ArrayList<>();
         this.extraMismatchPaths = new HashSet<>();
     }
@@ -192,18 +202,11 @@ public class ContainAnalyzer {
 
         Object convertedExpected = handler.convertedExpected(actual, expected);
 
-        int before = isNegative ? matchMessages.size() : (mismatchMessages.size() + missingMessages.size() + mismatchedExpectedValues.size());
+        int before = isNegative ? numberMatchMessages() : numberOfMismatchMessages();
         containsLogic.execute(handler, convertedActual, convertedExpected);
-        int after = isNegative ? matchMessages.size() : (mismatchMessages.size() + missingMessages.size() + mismatchedExpectedValues.size());
+        int after = isNegative ? numberMatchMessages() : numberOfMismatchMessages();
 
         return after == before;
-    }
-
-    private Set<ValuePath> extractActualPaths(List<ValuePathMessage> notEqualMessages) {
-        return notEqualMessages
-                .stream()
-                .map(ValuePathMessage::getActualPath)
-                .collect(Collectors.toSet());
     }
 
     private void updateTopLevelActualPath(ValuePath actualPath) {
