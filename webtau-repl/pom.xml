@@ -28,7 +28,7 @@
     <name>WebTau REPL</name>
 
     <properties>
-        <jline.version>3.19.0</jline.version>
+        <jline.version>3.30.15</jline.version>
     </properties>
 
     <dependencies>
